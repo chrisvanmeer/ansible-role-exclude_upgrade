@@ -1,0 +1,4 @@
+---
+# defaults file for ansible-role-exclude_upgrade
+
+exclude_upgrade_packages: []

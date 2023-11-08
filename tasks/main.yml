@@ -1,0 +1,45 @@
+---
+# tasks file for ansible-role-exclude_upgrade
+
+- name: Populate package facts
+  ansible.builtin.package_facts:
+
+- name: Import assert.yml
+  ansible.builtin.import_tasks:
+    file: assert.yml
+  run_once: true
+
+- name: RedHat | Exclude package upgrades from package manager
+  when: ansible_os_family == "RedHat"
+  block:
+    - name: Check existence of dnf.conf
+      ansible.builtin.stat:
+        path: /etc/dnf/dnf.conf
+      register: dnf_conf
+
+    - name: Ensure dnf.conf
+      ansible.builtin.copy:
+        content: |
+          [main]
+        dest: /etc/dnf/dnf.conf
+        mode: '0644'
+        owner: root
+        group: root
+      become: true
+      when: not dnf_conf.stat.exists
+
+    - name: Exclude package upgrades from DNF configuration
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^exclude='
+        line: "exclude={{ exclude_upgrade_packages | join(' ') }}"
+        backup: true
+      become: true
+
+- name: Debian | Exclude package upgrades from dpkg
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  become: true
+  with_items: "{{ exclude_upgrade_packages }}"
+  when: ansible_os_family == "Debian"

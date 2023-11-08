@@ -1,0 +1,31 @@
+---
+
+- name: assert | Test exclude_upgrade_packages
+  ansible.builtin.assert:
+    that:
+      - exclude_upgrade_packages is defined
+      - exclude_upgrade_packages is iterable
+      - exclude_upgrade_packages is not none
+    quiet: true
+
+- name: assert | Test package name(s)
+  ansible.builtin.assert:
+    that:
+      - item is defined
+      - item is string
+    quiet: true
+  loop: "{{ exclude_upgrade_packages }}"
+  loop_control:
+    loop_var: item
+    label: "{{ item }}"
+
+- name: assert | Test package existence
+  ansible.builtin.assert:
+    that:
+      - "ansible_facts.packages['{{ item }}'] is defined"
+    fail_msg: "Package {{ item }} is not a installed on this machine"
+    quiet: true
+  loop: "{{ exclude_upgrade_packages }}"
+  loop_control:
+    loop_var: item
+    label: "{{ item }}"
