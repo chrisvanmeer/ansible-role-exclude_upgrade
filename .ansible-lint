@@ -14,7 +14,7 @@ exclude_paths:
   - library/
 
 # Return non-zero exit code on warnings as well as errors
-# strict: true
+strict: true
 
 # Use terse parseable output
 parseable: true
