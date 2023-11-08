@@ -1,6 +1,10 @@
 ---
 # tasks file for ansible-role-exclude_upgrade
 
+- name: End play if host has no packages to exclude
+  ansible.builtin.meta: end_play
+  when: exclude_upgrade_packages | length == 0
+
 - name: Populate package facts
   ansible.builtin.package_facts:
 
